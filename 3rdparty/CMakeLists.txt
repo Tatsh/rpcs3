@@ -330,7 +330,7 @@ if(USE_VULKAN)
 		target_compile_definitions(3rdparty_vulkan INTERFACE -DHAVE_VULKAN)
 		target_link_libraries(3rdparty_vulkan INTERFACE SPIRV SPIRV-Tools-opt Vulkan::Vulkan)
 
-		if(UNIX AND NOT APPLE)
+		if(UNIX AND NOT APPLE AND USE_WAYLAND)
 			find_package(Wayland)
 			if (WAYLAND_FOUND)
 				target_include_directories(3rdparty_vulkan
