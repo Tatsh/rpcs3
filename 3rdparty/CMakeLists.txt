@@ -1,4 +1,5 @@
 find_package(PkgConfig)
+include(CMakeDependentOption)
 include(ExternalProject)
 
 # Dummy target to use when lib isn't available
@@ -7,7 +8,7 @@ add_library(3rdparty_dummy_lib INTERFACE)
 
 # ZLib
 if (USE_SYSTEM_ZLIB)
-	find_package(ZLIB QUIET)
+	find_package(ZLIB REQUIRED)
 endif()
 
 if (NOT ZLIB_FOUND)
@@ -103,7 +104,11 @@ endif()
 
 
 # pugixml
-add_subdirectory(pugixml EXCLUDE_FROM_ALL)
+if(NOT USE_SYSTEM_PUGIXML)
+  add_subdirectory(pugixml EXCLUDE_FROM_ALL)
+else()
+  find_package(pugixml REQUIRED NO_MODULE)
+endif()
 
 
 # libusb
@@ -181,11 +186,15 @@ set(CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX_OLD})
 
 
 # xxHash
-set(XXHASH_BUNDLED_MODE ON)
-set(XXHASH_BUILD_XXHSUM OFF)
-set(BUILD_SHARED_LIBS OFF CACHE BOOL "Make xxHash build static libs")
-add_subdirectory(xxHash/cmake_unofficial EXCLUDE_FROM_ALL)
-target_include_directories(xxhash INTERFACE xxHash)
+if (NOT USE_SYSTEM_XXHASH)
+  set(XXHASH_BUNDLED_MODE ON)
+  set(XXHASH_BUILD_XXHSUM OFF)
+  set(BUILD_SHARED_LIBS OFF CACHE BOOL "Make xxHash build static libs")
+  add_subdirectory(xxHash/cmake_unofficial EXCLUDE_FROM_ALL)
+  target_include_directories(xxhash INTERFACE xxHash)
+else()
+  pkg_check_modules(XXHASH REQUIRED IMPORTED_TARGET GLOBAL libxxhash)
+endif()
 
 
 # cereal
@@ -486,9 +495,18 @@ endif()
 add_library(3rdparty::zlib ALIAS 3rdparty_zlib)
 add_library(3rdparty::7z ALIAS 3rdparty_7z)
 add_library(3rdparty::flatbuffers ALIAS 3rdparty_flatbuffers)
-add_library(3rdparty::pugixml ALIAS pugixml)
+if(USE_SYSTEM_PUGIXML)
+  set_target_properties(pugixml::pugixml PROPERTIES IMPORTED_GLOBAL TRUE)
+  add_library(3rdparty::pugixml ALIAS pugixml::pugixml)
+else()
+  add_library(3rdparty::pugixml ALIAS pugixml)
+endif()
 add_library(3rdparty::yaml-cpp ALIAS yaml-cpp)
-add_library(3rdparty::xxhash ALIAS xxhash)
+if(USE_SYSTEM_XXHASH)
+  add_library(3rdparty::xxhash ALIAS PkgConfig::XXHASH)
+else()
+  add_library(3rdparty::xxhash ALIAS xxhash)
+endif()
 add_library(3rdparty::hidapi ALIAS 3rdparty_hidapi)
 add_library(3rdparty::libpng ALIAS ${LIBPNG_TARGET})
 add_library(3rdparty::cereal ALIAS 3rdparty_cereal)

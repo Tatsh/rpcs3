@@ -13,7 +13,7 @@
 #pragma clang diagnostic ignored "-Winconsistent-missing-override"
 #endif
 #endif
-#include "SPIRV/GlslangToSpv.h"
+#include <glslang/SPIRV/GlslangToSpv.h>
 #include "spirv-tools/optimizer.hpp"
 #ifdef _MSC_VER
 #pragma warning(pop)
