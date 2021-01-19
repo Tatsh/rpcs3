@@ -7,12 +7,12 @@ namespace rpcs3
 {
 	std::string_view get_branch()
 	{
-		return RPCS3_GIT_BRANCH;
+		return "local_build";
 	}
 
 	std::string_view get_full_branch()
 	{
-		return RPCS3_GIT_FULL_BRANCH;
+		return "RPCS3/rpcs3/master";
 	}
 
 	std::pair<std::string, std::string> get_commit_and_hash()
